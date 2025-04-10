@@ -30,4 +30,5 @@ It cooperates when mutual trust leads to optimal results, and defects when betra
 - Think of ISSA as a **high-IQ, emotionless negotiator** in a high-stakes duel.  
   It will walk away with the better deal — whether that means peace or war.
 
-
+---
+> Submitted for the **first part** of the Iterated Prisoner’s Dilemma Tournament.

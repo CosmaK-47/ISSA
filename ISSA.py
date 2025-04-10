@@ -1,82 +1,39 @@
-import random
-from tabulate import tabulate
-import matplotlib.pyplot as plt
+def strategy(my_history: list[int], opponent_history: list[int], rounds: int | None) -> int:
+    defect_streak = 0
+    total_defects = 0
+    revenge_mode = False
+    revenge_timer = 0
 
-class ISSA:
-    def __init__(self):
-        self.history = []
-        self.opponent_history = []
-        self.defect_streak = 0
-        self.total_defects = 0
-        self.revenge_mode = False
-        self.revenge_timer = 0
-
-    def reset(self):
-        self.history = []
-        self.opponent_history = []
-        self.defect_streak = 0
-        self.total_defects = 0
-        self.revenge_mode = False
-        self.revenge_timer = 0
-
-    def predict_opponent_next(self):
-        if not self.opponent_history:
-            return 'C'
-        return self.opponent_history[-1]
-
-    def simulate_future(self, my_next_move):
-        opponent_pred = self.predict_opponent_next()
-
-        if my_next_move == 'C' and opponent_pred == 'C':
-            return 3
-        elif my_next_move == 'C' and opponent_pred == 'D':
-            return 0
-        elif my_next_move == 'D' and opponent_pred == 'C':
-            return 5
+    for move in opponent_history:
+        if move == 0:
+            total_defects += 1
+            defect_streak += 1
         else:
-            return 1
+            defect_streak = 0
 
-    def move(self, opponent_last_move):
-        # Update opponent history and stats
-        if opponent_last_move is not None:
-            self.opponent_history.append(opponent_last_move)
-            if opponent_last_move == 'D':
-                self.total_defects += 1
-                self.defect_streak += 1
-            else:
-                self.defect_streak = 0  # Reset on cooperation
+        if defect_streak >= 2 or total_defects >= 5:
+            revenge_mode = True
+            revenge_timer = 5
 
-        # Activate revenge mode if betrayal streak too long
-        if self.defect_streak >= 2 or self.total_defects >= 5:
-            self.revenge_mode = True
-            self.revenge_timer = 5  # Stay angry for 5 turns
+    history_length = len(my_history)
+    if history_length >= 1 and revenge_mode:
+        revenge_timer -= min(history_length, 5)
+        if revenge_timer <= 0:
+            revenge_mode = False
 
-        # Cooldown revenge
-        if self.revenge_mode:
-            if self.revenge_timer > 0:
-                self.revenge_timer -= 1
-            else:
-                self.revenge_mode = False
+    if not opponent_history:
+        return 1
 
-        # First move
-        if not self.opponent_history:
-            self.history.append('C')
-            return 'C'
+    if revenge_mode:
+        return 0
 
-        # If in revenge mode: defect no matter what
-        if self.revenge_mode:
-            self.history.append('D')
-            return 'D'
+    opponent_pred = opponent_history[-1]
 
-        # Otherwise: simulate and be strategic
-        score_if_coop = self.simulate_future('C')
-        score_if_defect = self.simulate_future('D')
+    if opponent_pred == 1:
+        score_if_coop = 3
+        score_if_defect = 5
+    else:
+        score_if_coop = 0
+        score_if_defect = 1
 
-        if score_if_coop > score_if_defect:
-            self.history.append('C')
-            return 'C'
-        else:
-            self.history.append('D')
-            return 'D'
-
-
+    return 1 if score_if_coop > score_if_defect else 0
